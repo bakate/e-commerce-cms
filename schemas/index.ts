@@ -18,3 +18,10 @@ export const storeModalSchema = z.object({
 });
 
 export type StoreModalValues = z.infer<typeof storeModalSchema>;
+
+export const categoryFormSchema = z.object({
+  name: z.string().nonempty(),
+  billboardId: z.string().nonempty(),
+});
+
+export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
