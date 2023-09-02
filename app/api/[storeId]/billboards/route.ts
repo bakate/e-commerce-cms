@@ -15,7 +15,6 @@ export async function POST(
     const body = await req.json();
 
     const { label, imageUrl } = billboardFormSchema.parse(body);
-    console.log({ label, imageUrl });
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 403 });
@@ -33,7 +32,9 @@ export async function POST(
     });
 
     if (!storeByUserId) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse("Unauthorized to perform this action", {
+        status: 401,
+      });
     }
 
     const billboard = await prismadb.billboard.create({
@@ -61,12 +62,6 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
-    const { userId } = auth();
-
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 403 });
-    }
-
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 422 });
     }

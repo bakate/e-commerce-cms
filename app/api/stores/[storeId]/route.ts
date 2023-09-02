@@ -15,7 +15,7 @@ export async function PATCH(
     const { name } = settingsFormSchema.parse(body);
 
     if (!userId) {
-      return new NextResponse("Unauthorized", { status: 403 });
+      return new NextResponse("Unauthenticated", { status: 403 });
     }
 
     const store = await prismadb.store.updateMany({
@@ -30,7 +30,7 @@ export async function PATCH(
 
     return NextResponse.json(store);
   } catch (error) {
-    console.log("[STORES_PATCH]", error);
+    console.log("[STORE_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
