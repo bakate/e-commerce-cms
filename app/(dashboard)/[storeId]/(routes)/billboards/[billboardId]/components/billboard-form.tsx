@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { AlertModal } from "@/components/modals/alert-modal";
-import { ApiAlert } from "@/components/ui/api-alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,53 +13,69 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Heading } from "@/components/ui/heading";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
-import { useOrigin } from "@/hooks/use-origin";
-import { SettingsFormValues, settingsFormSchema } from "@/schemas";
+import { BillboardFormValues, billboardFormSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Store } from "@prisma/client";
+import { Billboard } from "@prisma/client";
 import axios from "axios";
 import { Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 
-type SettingsFormProps = {
-  initialData: Store;
+type BillboardFormProps = {
+  initialData: Billboard | null;
 };
 
-const SettingsForm = ({ initialData }: SettingsFormProps) => {
+const BillboardForm = ({ initialData }: BillboardFormProps) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const params = useParams();
   const router = useRouter();
-  const origin = useOrigin();
   const { toast } = useToast();
 
-  const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsFormSchema),
-    defaultValues: initialData,
+  const title = initialData ? "Edit Billboard" : "New Billboard";
+  const description = initialData
+    ? "Edit your billboard"
+    : "Create a new billboard";
+  const toastMessage = initialData
+    ? "Billboard successfully updated."
+    : "Billboard successfully created.";
+  const action = initialData ? "Save changes" : "Create billboard";
+
+  const form = useForm<BillboardFormValues>({
+    resolver: zodResolver(billboardFormSchema),
+    defaultValues: {
+      label: initialData?.label ?? "",
+      imageUrl: initialData?.imageUrl ?? "",
+    },
   });
 
-  const onSubmit = async (values: SettingsFormValues) => {
+  const onSubmit = async (values: BillboardFormValues) => {
     try {
       setLoading(true);
 
-      await axios.patch(`/api/stores/${params.storeId}`, values);
+      if (initialData) {
+        await axios.patch(
+          `/api/${params.storeId}/billboards/${params.billboardId}`,
+          values
+        );
+      } else {
+        await axios.post(`/api/${params.storeId}/billboards`, values);
+      }
 
       toast({
-        variant: "default",
-        title: "Store successfully updated.",
+        title: toastMessage,
       });
       router.refresh();
-      router.push("/");
+      router.push(`/${params.storeId}/billboards`);
     } catch (error) {
       // show an error toast
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your request.",
 
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
@@ -73,16 +88,19 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/stores/${params.storeId}`);
+      await axios.delete(
+        `/api/${params.storeId}/billboards/${params.billboardId}`
+      );
       router.refresh();
-      router.push("/");
+      router.push(`/${params.storeId}/billboards`);
       toast({
-        title: "Store successfully deleted.",
+        title: "Billboard successfully deleted.",
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Make sure you removed all products and categories first.",
+        title:
+          "Make sure you removed all categories using this billboard first.",
       });
     } finally {
       setLoading(false);
@@ -98,18 +116,17 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
         loading={loading}
       />
       <div className="flex items-center justify-between">
-        <Heading
-          title="Store settings"
-          description="Manage store preferences"
-        />
-        <Button
-          disabled={loading}
-          variant="destructive"
-          size="icon"
-          onClick={() => setOpen(true)}
-        >
-          <Trash className="h-4 w-4" />
-        </Button>
+        <Heading title={title} description={description} />
+        {initialData ? (
+          <Button
+            disabled={loading}
+            variant="destructive"
+            size="icon"
+            onClick={() => setOpen(true)}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        ) : null}
       </div>
       <Separator />
 
@@ -118,13 +135,31 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-full"
         >
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Background Image</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    onChange={(url) => field.onChange(url)}
+                    onRemove={() => field.onChange("")}
+                    value={field.value ? [field.value] : []}
+                    disabled={loading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="grid grid-cols-3 gap-8">
             <FormField
               control={form.control}
-              name="name"
+              name="label"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>label</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -139,19 +174,13 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
           </div>
 
           <Button type="submit" disabled={loading} className="ml-auto">
-            Save changes
+            {action}
           </Button>
           <Separator />
         </form>
       </Form>
-      <Separator />
-      <ApiAlert
-        title="NEXT_PUBLIC_API_URL"
-        variant="public"
-        description={`${origin}/api/${params.storeId}`}
-      />
     </>
   );
 };
 
-export default SettingsForm;
+export default BillboardForm;

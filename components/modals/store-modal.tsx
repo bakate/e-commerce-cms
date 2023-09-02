@@ -5,7 +5,6 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,10 +20,7 @@ import Modal from "@/components/ui/modal";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { useStoreModal } from "@/hooks/use-store-modal";
-
-const formSchema = z.object({
-  name: z.string().nonempty(),
-});
+import { StoreModalValues, storeModalSchema } from "@/schemas";
 
 const StoreModal = () => {
   const storeModal = useStoreModal();
@@ -32,14 +28,14 @@ const StoreModal = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<StoreModalValues>({
+    resolver: zodResolver(storeModalSchema),
     defaultValues: {
-      name: "yolo",
+      name: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: StoreModalValues) => {
     try {
       setIsLoading(true);
       const response = await axios.post("/api/stores", values);

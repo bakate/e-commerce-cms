@@ -1,21 +1,20 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
+import * as z from "zod";
 
 import prismadb from "@/lib/prismadb";
+import { settingsFormSchema } from "@/schemas";
 
 export async function POST(req: Request) {
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { name } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    if (!name) {
-      return new NextResponse("Name is required", { status: 422 });
-    }
+    const { name } = settingsFormSchema.parse(body);
 
     const store = await prismadb.store.create({
       data: {
@@ -26,7 +25,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json(store);
   } catch (error) {
-    console.log("[STORES_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    if (error instanceof z.ZodError) {
+      console.log("[STORES_POST]", error);
+      return new NextResponse("Invalid type or data provided", { status: 422 });
+    } else {
+      console.log("[STORES_POST]", error);
+      return new NextResponse("Internal error", { status: 500 });
+    }
   }
 }

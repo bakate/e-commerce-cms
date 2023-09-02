@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 import prismadb from "@/lib/prismadb";
+import { settingsFormSchema } from "@/schemas";
 
 export async function PATCH(
   req: Request,
@@ -10,11 +11,8 @@ export async function PATCH(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { name } = body;
 
-    if (!name) {
-      return new NextResponse("Name is required", { status: 422 });
-    }
+    const { name } = settingsFormSchema.parse(body);
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 403 });
