@@ -41,3 +41,17 @@ export const colorsFormSchema = z.object({
 });
 
 export type ColorsFormValues = z.infer<typeof colorsFormSchema>;
+
+export const productFormSchema = z.object({
+  name: z.string().nonempty(),
+  description: z.string().nonempty(),
+  images: z.object({ url: z.string() }).array(),
+  price: z.coerce.number().min(1),
+  categoryId: z.string().nonempty(),
+  colorId: z.string().nonempty(),
+  sizeId: z.string().nonempty(),
+  isFeatured: z.boolean().default(false).optional(),
+  isArchived: z.boolean().default(false).optional(),
+});
+
+export type ProductFormValues = z.infer<typeof productFormSchema>;

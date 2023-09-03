@@ -18,7 +18,7 @@ model Store {
   categories Category[]  @relation("StoreToCategory")
   sizes      Size[]      @relation("StoreToSize")
   colors     Color[]     @relation("StoreToColor")
-  // products        Product[]  @relation("StoreToProduct")
+  products   Product[]   @relation("StoreToProduct")
   // orders          Order[]     @relation("StoreToOrder")
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
@@ -29,7 +29,7 @@ model Billboard {
   label      String
   imageUrl   String
   storeId    String     @db.ObjectId
-  store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id], onDelete: Cascade)
+  store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
   categories Category[]
   // products        Product[]  @relation("BillboardToProduct")
   // sizes           Size[]     @relation("BillboardToSize")
@@ -37,6 +37,7 @@ model Billboard {
   // orders          Order[]     @relation("BillboardToOrder")
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
+  Product    Product[]
 
   @@index([storeId])
 }
@@ -44,11 +45,11 @@ model Billboard {
 model Category {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   storeId     String    @db.ObjectId
-  store       Store     @relation("StoreToCategory", fields: [storeId], references: [id], onDelete: Cascade)
+  store       Store     @relation("StoreToCategory", fields: [storeId], references: [id])
   billboardId String    @db.ObjectId
-  billboard   Billboard @relation(fields: [billboardId], references: [id], onDelete: Cascade)
+  billboard   Billboard @relation(fields: [billboardId], references: [id])
   name        String
-  // products        Product[]  @relation("CategoryToProduct")
+  products    Product[] @relation("CategoryToProduct")
   // sizes           Size[]     @relation("CategoryToSize")
   // colors          Color[]     @relation("CategoryToColor")
   // orders          Order[]     @relation("CategoryToOrder")
@@ -60,25 +61,66 @@ model Category {
 }
 
 model Size {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  storeId   String   @db.ObjectId
-  store     Store    @relation("StoreToSize", fields: [storeId], references: [id], onDelete: Cascade)
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  storeId   String    @db.ObjectId
+  store     Store     @relation("StoreToSize", fields: [storeId], references: [id])
   name      String
   value     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([storeId])
 }
 
 model Color {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  storeId   String   @db.ObjectId
-  store     Store    @relation("StoreToColor", fields: [storeId], references: [id], onDelete: Cascade)
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  storeId   String    @db.ObjectId
+  store     Store     @relation("StoreToColor", fields: [storeId], references: [id])
   name      String
   value     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+  productId String?   @db.ObjectId
+
+  @@index([storeId])
+}
+
+model Product {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String     @db.ObjectId
+  store       Store      @relation("StoreToProduct", fields: [storeId], references: [id])
+  categoryId  String     @db.ObjectId
+  category    Category   @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  name        String
+  price       Float
+  description String
+  isFeatured  Boolean    @default(false)
+  isArchived  Boolean    @default(false)
+  sizeId      String     @db.ObjectId
+  size        Size       @relation(fields: [sizeId], references: [id])
+  colorId     String     @db.ObjectId
+  color       Color      @relation(fields: [colorId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  images      Image[]
+  Billboard   Billboard? @relation(fields: [billboardId], references: [id])
+  billboardId String?    @db.ObjectId
+
+  @@index([storeId])
+  @@index([categoryId])
+  @@index([sizeId])
+  @@index([colorId])
+}
+
+model Image {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([storeId])
+  @@index([productId])
 }

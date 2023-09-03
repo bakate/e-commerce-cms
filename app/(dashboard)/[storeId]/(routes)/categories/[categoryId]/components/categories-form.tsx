@@ -14,6 +14,13 @@ import {
 } from "@/components/ui/form";
 import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
@@ -23,13 +30,6 @@ import { Billboard, Category } from "@prisma/client";
 import axios from "axios";
 import { Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 type CategoriesFormProps = {
   initialData: Category | null;
@@ -194,7 +194,15 @@ const CategoriesForm = ({ initialData, billboards }: CategoriesFormProps) => {
               )}
             />
           </div>
-
+          <Button
+            type="button"
+            disabled={loading}
+            variant={"outline"}
+            className="mr-4"
+            onClick={router.back}
+          >
+            Cancel
+          </Button>
           <Button type="submit" disabled={loading} className="ml-auto">
             {action}
           </Button>

@@ -172,7 +172,15 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
               )}
             />
           </div>
-
+          <Button
+            type="button"
+            disabled={loading}
+            variant={"outline"}
+            className="mr-4"
+            onClick={router.back}
+          >
+            Cancel
+          </Button>
           <Button type="submit" disabled={loading} className="ml-auto">
             {action}
           </Button>
