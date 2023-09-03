@@ -25,3 +25,10 @@ export const categoryFormSchema = z.object({
 });
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
+
+export const sizesFormSchema = z.object({
+  name: z.string().nonempty(),
+  value: z.string().nonempty(),
+});
+
+export type SizesFormValues = z.infer<typeof sizesFormSchema>;
