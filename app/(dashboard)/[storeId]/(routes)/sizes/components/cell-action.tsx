@@ -29,7 +29,7 @@ const CellAction = ({ data }: CellActionProps) => {
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
     toast({
-      title: "Billboard id copied to clipboard.",
+      title: "Size id copied to clipboard.",
     });
   };
 

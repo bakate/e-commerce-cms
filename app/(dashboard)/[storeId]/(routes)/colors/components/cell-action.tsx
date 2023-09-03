@@ -14,10 +14,10 @@ import axios from "axios";
 import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { CategoryColumn } from "./columns";
+import { ColorsColumn } from "./columns";
 
 type CellActionProps = {
-  data: CategoryColumn;
+  data: ColorsColumn;
 };
 const CellAction = ({ data }: CellActionProps) => {
   const { toast } = useToast();
@@ -29,23 +29,23 @@ const CellAction = ({ data }: CellActionProps) => {
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
     toast({
-      title: "Category id copied to clipboard.",
+      title: "Color id copied to clipboard.",
     });
   };
 
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/${params.storeId}/categories/${data.id}`);
+      await axios.delete(`/api/${params.storeId}/colors/${data.id}`);
       router.refresh();
-      router.push(`/${params.storeId}/categories`);
+      router.push(`/${params.storeId}/colors`);
       toast({
-        title: "Category successfully deleted.",
+        title: "Color successfully deleted.",
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Make sure you removed all products using this category first.",
+        title: "Make sure you removed all products using this color first.",
       });
     } finally {
       setLoading(false);
@@ -75,9 +75,7 @@ const CellAction = ({ data }: CellActionProps) => {
             <Copy className="mr-2 h-4 w-4" /> Copy id
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              router.push(`/${params.storeId}/categories/${data.id}`)
-            }
+            onClick={() => router.push(`/${params.storeId}/colors/${data.id}`)}
           >
             <Edit className="mr-2 h-4 w-4" /> Update
           </DropdownMenuItem>

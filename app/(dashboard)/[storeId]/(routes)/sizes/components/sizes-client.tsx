@@ -15,7 +15,7 @@ interface SizesClientProps {
   data: SizesColumn[];
 }
 
-export const BillboardClient = ({ data }: SizesClientProps) => {
+export const SizesClient = ({ data }: SizesClientProps) => {
   const params = useParams();
   const router = useRouter();
 
