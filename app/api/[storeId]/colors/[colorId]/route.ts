@@ -100,7 +100,6 @@ export async function DELETE(
     if (!params.colorId) {
       return new NextResponse("Color id is required", { status: 422 });
     }
-    console.log(params);
 
     const storeByUserId = await prismadb.store.findFirst({
       where: {

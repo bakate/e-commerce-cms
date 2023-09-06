@@ -103,7 +103,6 @@ export async function DELETE(
     if (!params.categoryId) {
       return new NextResponse("Category id is required", { status: 422 });
     }
-    console.log(params);
 
     const storeByUserId = await prismadb.store.findFirst({
       where: {

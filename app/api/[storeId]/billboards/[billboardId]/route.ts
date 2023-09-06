@@ -73,13 +73,13 @@ export async function GET(
       return new NextResponse("Billboard id id is required", { status: 422 });
     }
 
-    const billboards = await prismadb.billboard.findMany({
+    const billboard = await prismadb.billboard.findFirst({
       where: {
         id: params.billboardId,
       },
     });
 
-    return NextResponse.json(billboards);
+    return NextResponse.json(billboard);
   } catch (error) {
     console.log("[BILLBOARD_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
@@ -100,7 +100,6 @@ export async function DELETE(
     if (!params.billboardId) {
       return new NextResponse("Billboard id is required", { status: 422 });
     }
-    console.log(params);
 
     const storeByUserId = await prismadb.store.findFirst({
       where: {
