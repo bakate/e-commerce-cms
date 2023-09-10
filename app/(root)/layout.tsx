@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 type SetupLayoutProps = {
   children: React.ReactNode;
 };
-export const StoreLayout = async ({ children }: SetupLayoutProps) => {
+const StoreLayout = async ({ children }: SetupLayoutProps) => {
   const { userId } = auth();
   if (!userId) {
     redirect("/sign-in");
