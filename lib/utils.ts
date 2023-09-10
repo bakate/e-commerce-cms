@@ -14,8 +14,8 @@ export function dateFormatter(date: Date) {
 }
 
 export function currencyFormatter(amount: number) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("fr-FR", {
     style: "currency",
-    currency: "USD",
+    currency: "eur",
   }).format(amount);
 }
