@@ -22,7 +22,7 @@ const Overview = ({ data }: OverviewProps) => {
           fontSize={12}
           tickFormatter={(value) => `$${value}`}
         />
-        <Bar dataKey="total" fill="#3498db" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="total" fill="#7C3AED" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
