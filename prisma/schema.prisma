@@ -31,10 +31,6 @@ model Billboard {
   storeId    String     @db.ObjectId
   store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
   categories Category[]
-  // products        Product[]  @relation("BillboardToProduct")
-  // sizes           Size[]     @relation("BillboardToSize")
-  // colors          Color[]     @relation("BillboardToColor")
-  // orders          Order[]     @relation("BillboardToOrder")
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   Product    Product[]
@@ -50,9 +46,6 @@ model Category {
   billboard   Billboard @relation(fields: [billboardId], references: [id])
   name        String
   products    Product[] @relation("CategoryToProduct")
-  // sizes           Size[]     @relation("CategoryToSize")
-  // colors          Color[]     @relation("CategoryToColor")
-  // orders          Order[]     @relation("CategoryToOrder")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -61,32 +54,33 @@ model Category {
 }
 
 model Size {
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  storeId   String      @db.ObjectId
-  store     Store       @relation("StoreToSize", fields: [storeId], references: [id])
-  name      String
-  value     String
-  products  Product[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  Order     Order[]
-  OrderItem OrderItem[]
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  storeId    String      @db.ObjectId
+  store      Store       @relation("StoreToSize", fields: [storeId], references: [id])
+  name       String
+  value      String
+  products   Product[]   @relation("SizeToProduct", fields: [productIDs], references: [id])
+  productIDs String[]    @db.ObjectId
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  Order      Order[]
+  OrderItem  OrderItem[]
 
   @@index([storeId])
 }
 
 model Color {
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  storeId   String      @db.ObjectId
-  store     Store       @relation("StoreToColor", fields: [storeId], references: [id])
-  name      String
-  value     String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  products  Product[]
-  productId String?     @db.ObjectId
-  Order     Order[]
-  OrderItem OrderItem[]
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  storeId    String      @db.ObjectId
+  store      Store       @relation("StoreToColor", fields: [storeId], references: [id])
+  name       String
+  value      String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  products   Product[]   @relation("ColorToProduct", fields: [productIDs], references: [id])
+  productIDs String[]    @db.ObjectId
+  Order      Order[]
+  OrderItem  OrderItem[]
 
   @@index([storeId])
 }
@@ -102,10 +96,10 @@ model Product {
   description String
   isFeatured  Boolean  @default(false)
   isArchived  Boolean  @default(false)
-  sizeId      String   @db.ObjectId
-  size        Size     @relation(fields: [sizeId], references: [id])
-  colorId     String   @db.ObjectId
-  color       Color    @relation(fields: [colorId], references: [id])
+  sizeIDs     String[] @db.ObjectId
+  sizes       Size[]   @relation("SizeToProduct", fields: [sizeIDs], references: [id])
+  colorIDs    String[] @db.ObjectId
+  colors      Color[]  @relation("ColorToProduct", fields: [colorIDs], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   images      Image[]
@@ -117,8 +111,8 @@ model Product {
 
   @@index([storeId])
   @@index([categoryId])
-  @@index([sizeId])
-  @@index([colorId])
+  @@index([colorIDs])
+  @@index([sizeIDs])
 }
 
 model Image {

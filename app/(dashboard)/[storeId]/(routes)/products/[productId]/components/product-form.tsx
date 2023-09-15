@@ -17,6 +17,7 @@ import {
 import { Heading } from "@/components/ui/heading";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
+import MultiSelect from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -38,6 +39,8 @@ type ProductFormProps = {
   initialData:
     | (Product & {
         images: Image[];
+        colors: Color[];
+        sizes: Size[];
       })
     | null;
   categories: Category[];
@@ -66,8 +69,8 @@ const ProductForm = ({
     resolver: zodResolver(productFormSchema),
     defaultValues: initialData ?? {
       categoryId: "",
-      colorId: "",
-      sizeId: "",
+      colors: [],
+      sizes: [],
       images: [],
       isArchived: false,
       isFeatured: false,
@@ -266,70 +269,70 @@ const ProductForm = ({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
-              name="sizeId"
+              name="sizes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Size</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Select a size"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {sizes.map((size) => (
-                        <SelectItem key={size.id} value={size.id}>
-                          {size.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <MultiSelect
+                      label="Sizes"
+                      placeholder="Select sizes"
+                      {...field}
+                      defaultValues={
+                        initialData
+                          ? initialData?.sizes.map((size) => ({
+                              value: size.value,
+                              label: size.name,
+                              id: size.id,
+                            }))
+                          : []
+                      }
+                      data={sizes.map((size) => ({
+                        value: size.value,
+                        label: size.name,
+                        id: size.id,
+                      }))}
+                      handleSelect={field.onChange}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="colorId"
+              name="colors"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Color</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Select a color"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {colors.map((color) => (
-                        <SelectItem key={color.id} value={color.id}>
-                          {color.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <MultiSelect
+                      label="Colors"
+                      placeholder="Select colors"
+                      defaultValues={
+                        initialData
+                          ? initialData?.colors.map((size) => ({
+                              value: size.value,
+                              label: size.name,
+                              id: size.id,
+                            }))
+                          : []
+                      }
+                      {...field}
+                      data={colors.map((size) => ({
+                        value: size.value,
+                        label: size.name,
+                        id: size.id,
+                      }))}
+                      handleSelect={field.onChange}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="isFeatured"
@@ -338,7 +341,7 @@ const ProductForm = ({
                   <FormControl>
                     <Checkbox
                       checked={field.value}
-                      // @ts-ignore
+                      //@ts-ignore
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>

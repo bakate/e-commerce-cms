@@ -16,11 +16,11 @@ export async function POST(
 
     const {
       categoryId,
-      colorId,
+      colors,
       images,
       name,
       price,
-      sizeId,
+      sizes,
       isArchived,
       isFeatured,
       description,
@@ -50,11 +50,15 @@ export async function POST(
     const product = await prismadb.product.create({
       data: {
         categoryId,
-        colorId,
         isArchived,
         isFeatured,
         price,
-        sizeId,
+        sizes: {
+          connect: sizes.map((size) => ({ id: size.id })),
+        },
+        colors: {
+          connect: colors.map((color) => ({ id: color.id })),
+        },
         name,
         description,
         storeId: params.storeId,
@@ -85,8 +89,8 @@ export async function GET(
   try {
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get("categoryId") || undefined;
-    const colorId = searchParams.get("colorId") || undefined;
-    const sizeId = searchParams.get("sizeId") || undefined;
+    const colors = searchParams.get("colors") || undefined;
+    const sizes = searchParams.get("sizeId") || undefined;
     const isFeatured = searchParams.get("isFeatured");
 
     if (!params.storeId) {
@@ -97,20 +101,20 @@ export async function GET(
       where: {
         storeId: params.storeId,
         categoryId,
-        colorId,
-        sizeId,
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
       },
       include: {
         images: true,
         category: true,
-        color: true,
-        size: true,
+        colors: true,
+        sizes: true,
       },
+
       orderBy: {
         createdAt: "desc",
       },
+      take: 1,
     });
 
     return NextResponse.json(products);

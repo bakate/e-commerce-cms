@@ -17,11 +17,11 @@ export async function PATCH(
 
     const {
       categoryId,
-      colorId,
+      colors,
       description,
       images,
       price,
-      sizeId,
+      sizes,
       isArchived,
       isFeatured,
       name,
@@ -52,22 +52,13 @@ export async function PATCH(
       });
     }
 
-    await prismadb.product.update({
+    const existingProduct = await prismadb.product.findUnique({
       where: {
         id: params.productId,
       },
-      data: {
-        name,
-        categoryId,
-        colorId,
-        description,
-        price,
-        sizeId,
-        isArchived,
-        isFeatured,
-        images: {
-          deleteMany: {},
-        },
+      include: {
+        colors: true,
+        sizes: true,
       },
     });
 
@@ -76,7 +67,21 @@ export async function PATCH(
         id: params.productId,
       },
       data: {
+        name,
+        categoryId,
+        colors: {
+          set: colors.map((color) => ({ id: color.id.toString() })),
+        },
+        description,
+        price,
+        sizes: {
+          set: sizes.map((size) => ({ id: size.id.toString() })),
+          // we disconnect all the sizes first that are not in the new sizes
+        },
+        isArchived,
+        isFeatured,
         images: {
+          deleteMany: {},
           createMany: {
             data: [...images.map((image: { url: string }) => image)],
           },
@@ -110,9 +115,9 @@ export async function GET(
         id: params.productId,
       },
       include: {
-        size: true,
+        sizes: true,
         category: true,
-        color: true,
+        colors: true,
         images: true,
       },
     });
@@ -150,10 +155,20 @@ export async function DELETE(
         status: 401,
       });
     }
+    // we need to delete the order items first
+    await prismadb.orderItem.deleteMany({
+      where: {
+        productId: params.productId,
+      },
+    });
 
     const product = await prismadb.product.delete({
       where: {
         id: params.productId,
+      },
+      include: {
+        sizes: true,
+        colors: true,
       },
     });
 
