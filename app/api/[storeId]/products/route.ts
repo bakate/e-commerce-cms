@@ -16,7 +16,6 @@ export async function POST(
 
     const {
       categoryId,
-      colors,
       images,
       name,
       price,
@@ -24,6 +23,7 @@ export async function POST(
       isArchived,
       isFeatured,
       description,
+      inventory,
     } = productFormSchema.parse(body);
 
     if (!userId) {
@@ -53,12 +53,7 @@ export async function POST(
         isArchived,
         isFeatured,
         price,
-        sizes: {
-          connect: sizes.map((size) => ({ id: size.id })),
-        },
-        colors: {
-          connect: colors.map((color) => ({ id: color.id })),
-        },
+        inventory,
         name,
         description,
         storeId: params.storeId,
@@ -66,6 +61,9 @@ export async function POST(
           createMany: {
             data: [...images.map((image: { url: string }) => image)],
           },
+        },
+        sizes: {
+          connect: sizes.map((size) => ({ id: size.id })),
         },
       },
     });
@@ -89,8 +87,7 @@ export async function GET(
   try {
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get("categoryId") || undefined;
-    const colors = searchParams.get("colors") || undefined;
-    const sizes = searchParams.get("sizeId") || undefined;
+    const sizeId = searchParams.get("sizeId") || undefined;
     const isFeatured = searchParams.get("isFeatured");
 
     if (!params.storeId) {
@@ -103,11 +100,17 @@ export async function GET(
         categoryId,
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
+        sizes: sizeId
+          ? {
+              some: {
+                id: sizeId,
+              },
+            }
+          : undefined,
       },
       include: {
         images: true,
         category: true,
-        colors: true,
         sizes: true,
       },
 

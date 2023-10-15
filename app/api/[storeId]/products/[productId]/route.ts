@@ -17,7 +17,6 @@ export async function PATCH(
 
     const {
       categoryId,
-      colors,
       description,
       images,
       price,
@@ -52,16 +51,6 @@ export async function PATCH(
       });
     }
 
-    const existingProduct = await prismadb.product.findUnique({
-      where: {
-        id: params.productId,
-      },
-      include: {
-        colors: true,
-        sizes: true,
-      },
-    });
-
     const product = await prismadb.product.update({
       where: {
         id: params.productId,
@@ -69,9 +58,6 @@ export async function PATCH(
       data: {
         name,
         categoryId,
-        colors: {
-          set: colors.map((color) => ({ id: color.id.toString() })),
-        },
         description,
         price,
         sizes: {
@@ -83,7 +69,11 @@ export async function PATCH(
         images: {
           deleteMany: {},
           createMany: {
-            data: [...images.map((image: { url: string }) => image)],
+            data: [
+              ...images.map((image: { url: string }) => ({
+                url: image.url,
+              })),
+            ],
           },
         },
       },
@@ -115,12 +105,18 @@ export async function GET(
         id: params.productId,
       },
       include: {
-        sizes: true,
+        sizes: {
+          select: {
+            id: true,
+            name: true,
+            value: true,
+          },
+        },
         category: true,
-        colors: true,
         images: true,
       },
     });
+
     return NextResponse.json(product);
   } catch (error) {
     console.log("[PRODUCT_GET]", error);
@@ -168,7 +164,6 @@ export async function DELETE(
       },
       include: {
         sizes: true,
-        colors: true,
       },
     });
 

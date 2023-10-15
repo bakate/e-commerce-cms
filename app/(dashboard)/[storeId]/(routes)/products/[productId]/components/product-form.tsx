@@ -30,7 +30,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { ProductFormValues, productFormSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Category, Color, Image, Product, Size } from "@prisma/client";
+import { Category, Image, Product, Size } from "@prisma/client";
 import axios from "axios";
 import { Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -39,21 +39,14 @@ type ProductFormProps = {
   initialData:
     | (Product & {
         images: Image[];
-        colors: Color[];
         sizes: Size[];
       })
     | null;
   categories: Category[];
   sizes: Size[];
-  colors: Color[];
 };
 
-const ProductForm = ({
-  initialData,
-  categories,
-  colors,
-  sizes,
-}: ProductFormProps) => {
+const ProductForm = ({ initialData, categories, sizes }: ProductFormProps) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const params = useParams();
@@ -63,13 +56,13 @@ const ProductForm = ({
   const title = initialData ? "Edit product" : "Create product";
   const description = initialData ? "Edit a product." : "Add a new product";
   const toastMessage = initialData ? "Product updated." : "Product created.";
+  const inventory = initialData ? "Edit inventory" : "Add inventory";
   const action = initialData ? "Save changes" : "Create";
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: initialData ?? {
       categoryId: "",
-      colors: [],
       sizes: [],
       images: [],
       isArchived: false,
@@ -77,6 +70,7 @@ const ProductForm = ({
       name: "",
       price: 0,
       description: "",
+      inventory: 0,
     },
   });
 
@@ -239,6 +233,24 @@ const ProductForm = ({
             />
             <FormField
               control={form.control}
+              name="inventory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Inventory</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={loading}
+                      placeholder="15"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="categoryId"
               render={({ field }) => (
                 <FormItem>
@@ -274,60 +286,27 @@ const ProductForm = ({
               control={form.control}
               name="sizes"
               render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <MultiSelect
-                      label="Sizes"
-                      placeholder="Select sizes"
-                      {...field}
-                      defaultValues={
-                        initialData
-                          ? initialData?.sizes.map((size) => ({
-                              value: size.value,
-                              label: size.name,
-                              id: size.id,
-                            }))
-                          : []
-                      }
-                      data={sizes.map((size) => ({
-                        value: size.value,
-                        label: size.name,
-                        id: size.id,
-                      }))}
-                      handleSelect={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="colors"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <MultiSelect
-                      label="Colors"
-                      placeholder="Select colors"
-                      defaultValues={
-                        initialData
-                          ? initialData?.colors.map((size) => ({
-                              value: size.value,
-                              label: size.name,
-                              id: size.id,
-                            }))
-                          : []
-                      }
-                      {...field}
-                      data={colors.map((size) => ({
-                        value: size.value,
-                        label: size.name,
-                        id: size.id,
-                      }))}
-                      handleSelect={field.onChange}
-                    />
-                  </FormControl>
+                <FormItem className="w-full">
+                  <FormLabel>Sizes</FormLabel>
+                  <MultiSelect
+                    items={sizes.map((size) => ({
+                      value: size.value,
+                      label: size.name,
+                      id: size.id,
+                    }))}
+                    onChange={field.onChange}
+                    label="sizes"
+                    defaultValue={
+                      initialData
+                        ? initialData?.sizes.map((size) => ({
+                            value: size.value,
+                            label: size.name,
+                            id: size.id,
+                          }))
+                        : []
+                    }
+                  />
+
                   <FormMessage />
                 </FormItem>
               )}

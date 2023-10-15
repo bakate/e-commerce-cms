@@ -10,8 +10,13 @@ const ProductsPage = async ({ params }: { params: { storeId: string } }) => {
     },
     include: {
       category: true,
-      colors: true,
-      sizes: true,
+      sizes: {
+        select: {
+          name: true,
+          value: true,
+          id: true,
+        },
+      },
     },
 
     orderBy: {
@@ -19,28 +24,22 @@ const ProductsPage = async ({ params }: { params: { storeId: string } }) => {
     },
   });
 
-  const formattedProducts: ProductColumn[] = products.map((item) => {
-    return {
-      category: item.category.name,
-      colors: item.colors.map((color) => ({
-        label: color.name,
-        value: color.value,
-        id: color.id,
-      })),
-      sizes: item.sizes.map((size) => ({
-        label: size.name,
-        value: size.value,
-        id: size.id,
-      })),
-      isArchived: item.isArchived,
-      isFeatured: item.isFeatured,
-      name: item.name,
-      description: item.description,
-      price: currencyFormatter(item.price),
-      id: item.id,
-      createdAt: dateFormatter(item.createdAt),
-    };
-  });
+  const formattedProducts: ProductColumn[] = products.map((item) => ({
+    category: item.category.name,
+    sizes: item.sizes.map((size) => ({
+      label: size.name,
+      value: size.value,
+      id: size.id,
+    })),
+    isArchived: item.isArchived,
+    isFeatured: item.isFeatured,
+    name: item.name,
+    description: item.description,
+    price: currencyFormatter(item.price),
+    id: item.id,
+    createdAt: dateFormatter(item.createdAt),
+    inventory: item.inventory,
+  }));
 
   return (
     <div className="flex-col">

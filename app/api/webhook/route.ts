@@ -59,7 +59,9 @@ export async function POST(req: NextRequest) {
         },
       },
       data: {
-        isArchived: true,
+        inventory: {
+          decrement: 1,
+        },
       },
     });
   }

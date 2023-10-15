@@ -50,7 +50,7 @@ const CategoriesForm = ({ initialData, billboards }: CategoriesFormProps) => {
   const toastMessage = initialData
     ? "Category successfully updated."
     : "Category successfully created.";
-  const action = initialData ? "Save changes" : "Create billboard";
+  const action = initialData ? "Save changes" : "Create Category";
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),

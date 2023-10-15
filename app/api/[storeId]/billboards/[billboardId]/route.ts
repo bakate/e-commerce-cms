@@ -77,6 +77,13 @@ export async function GET(
       where: {
         id: params.billboardId,
       },
+      include: {
+        store: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(billboard);

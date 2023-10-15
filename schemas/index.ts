@@ -33,29 +33,14 @@ export const sizesFormSchema = z.object({
 
 export type SizesFormValues = z.infer<typeof sizesFormSchema>;
 
-export const colorsFormSchema = z.object({
-  name: z.string().nonempty(),
-  value: z.string().min(4).max(9).regex(/^#/, {
-    message: "String must be a valid hex code",
-  }),
-});
-
-export type ColorsFormValues = z.infer<typeof colorsFormSchema>;
-
 export const productFormSchema = z.object({
   name: z.string().nonempty(),
   description: z.string().nonempty(),
   images: z.object({ url: z.string() }).array(),
   price: z.coerce.number().min(1),
   categoryId: z.string().nonempty(),
+  inventory: z.coerce.number().min(0),
   sizes: z.array(
-    z.object({
-      label: z.string().nonempty(),
-      value: z.string().nonempty(),
-      id: z.string().nonempty(),
-    })
-  ),
-  colors: z.array(
     z.object({
       label: z.string().nonempty(),
       value: z.string().nonempty(),
