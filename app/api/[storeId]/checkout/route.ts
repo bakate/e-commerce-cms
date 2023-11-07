@@ -2,6 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { z } from "zod";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,34 +14,42 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
+const ProductsToOrderSchema = z.array(
+  z.object({
+    id: z.string(),
+    quantity: z.number().int().positive(),
+  })
+);
 export async function POST(
   req: NextRequest,
   { params }: { params: { storeId: string } }
 ) {
-  const { productIds } = await req.json();
+  const { products } = await req.json();
 
-  if (!productIds || productIds.length === 0) {
-    return new Response("Product ids are required", { status: 422 });
+  const validatedProducts = ProductsToOrderSchema.safeParse(products);
+
+  if (!validatedProducts.success) {
+    return NextResponse.json(validatedProducts.error, { status: 400 });
   }
 
-  const products = await prismadb.product.findMany({
+  const productsToOrder = await prismadb.product.findMany({
     where: {
       id: {
-        in: productIds,
+        in: validatedProducts.data.map((product) => product.id),
       },
     },
   });
 
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-  for (const product of products) {
+  for (const product of productsToOrder) {
     line_items.push({
       price_data: {
         currency: "eur",
         product_data: {
           name: product.name,
         },
-        unit_amount: product.price * 100,
+        unit_amount: Math.round(product.price * 100),
       },
       quantity: 1,
     });
@@ -51,12 +60,13 @@ export async function POST(
       storeId: params.storeId,
       isPaid: false,
       orderItems: {
-        create: products.map((product) => ({
+        create: productsToOrder.map((product) => ({
           product: {
             connect: {
               id: product.id,
             },
           },
+          quantity: product.quantity,
         })),
       },
     },

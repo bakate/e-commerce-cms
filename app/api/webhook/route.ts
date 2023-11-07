@@ -59,8 +59,11 @@ export async function POST(req: NextRequest) {
         },
       },
       data: {
+        // to rework
         inventory: {
-          decrement: 1,
+          decrement: order.orderItems.reduce((total, orderItem) => {
+            return total + orderItem.quantity;
+          }, 0),
         },
       },
     });

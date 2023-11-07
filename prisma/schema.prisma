@@ -92,6 +92,7 @@ model Product {
   Order       Order[]
   Size        Size?       @relation(fields: [sizeId], references: [id])
   sizeId      String?     @db.ObjectId
+  quantity    Int         @default(1)
 
   @@index([storeId])
   @@index([categoryId])
@@ -136,6 +137,7 @@ model OrderItem {
   updatedAt DateTime @updatedAt
   Size      Size?    @relation(fields: [sizeId], references: [id])
   sizeId    String?  @db.ObjectId
+  quantity  Int      @default(1)
 
   @@index([orderId])
   @@index([productId])
